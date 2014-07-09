@@ -3,12 +3,14 @@
 
   goog.require('ga_map');
   goog.require('ga_networkstatus_service');
+  goog.require('ga_storage_service');
 
 
   var module = angular.module('ga_main_controller', [
     'pascalprecht.translate',
     'ga_map',
-    'ga_networkstatus_service'
+    'ga_networkstatus_service',
+    'ga_storage_service'
   ]);
 
   function createMap() {
@@ -65,10 +67,10 @@
   /**
    * The application's main controller.
    */
-module.controller('GaMainController',
-  function($scope, $rootScope, $translate, $timeout, $window,  gaPermalink,
-    gaBrowserSniffer, gaNetworkStatus, gaLayersPermalinkManager, 
-    gaFeaturesPermalinkManager) {
+  module.controller('GaMainController',
+    function($rootScope, $scope, $timeout, $translate, $window, gaBrowserSniffer,
+        gaFeaturesPermalinkManager, gaLayersPermalinkManager, gaNetworkStatus,
+        gaPermalink, gaStorage) {
      
       // Determines if the window has a height <= 550
       var isWindowTooSmall = function() {
@@ -77,7 +79,7 @@ module.controller('GaMainController',
 
       var mobile = (gaBrowserSniffer.mobile) ? 'false' : 'true',
         dismiss = 'none';
-
+  
       // The main controller creates the OpenLayers map object. The map object
       // is central, as most directives/components need a reference to it.
       $scope.map = createMap();
@@ -138,13 +140,13 @@ module.controller('GaMainController',
       $timeout(function() {
         $scope.globals.homescreen = gaBrowserSniffer.ios &&
           !gaBrowserSniffer.iosChrome &&
-          !($window.localStorage.getItem('homescreen') == dismiss) &&
+          !(gaStorage.getItem('homescreen') == dismiss) &&
           !$window.navigator.standalone;
         $scope.$watch('globals.homescreen', function(newVal) {
           if (newVal == true) {
             return;
           }
-          $window.localStorage.setItem('homescreen', dismiss);
+          gaStorage.setItem('homescreen', dismiss);
         });
       }, 2000);
      
@@ -203,5 +205,5 @@ module.controller('GaMainController',
         $('#selectionHeading').addClass('collapsed');
       });
   });
-
 })();
+
