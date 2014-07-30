@@ -385,7 +385,7 @@
             };
             var styles = (hasLayerStyleFunction) ?
                 layer.getStyleFunction()(feature) :
-                ol.feature.defaultStyleFunction(feature);
+                ol.style.defaultStyleFunction(feature);
 
 
             var geometry = feature.getGeometry();
@@ -462,7 +462,7 @@
               type: 'WMTS',
               baseURL: location.protocol + '//wmts.geo.admin.ch',
               layer: config.serverLayerName,
-              maxExtent: source.getExtent(),
+              maxExtent: layer.getExtent(),
               tileOrigin: tileGrid.getOrigin(),
               tileSize: [tileGrid.getTileSize(), tileGrid.getTileSize()],
               resolutions: tileGrid.getResolutions(),
