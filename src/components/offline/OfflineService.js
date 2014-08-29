@@ -447,6 +447,11 @@
           };
           runNextRequests();
         };
+
+        // If there is data in db we can initialize the store
+        if (this.hasData()) {
+          gaStorage.init();
+        }
       };
       return new Offline();
     };
