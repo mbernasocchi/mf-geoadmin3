@@ -71,6 +71,9 @@
               version: (gaBrowserSniffer.msie) ? 1 : '1.0',
               description: 'Storage for map.geo.admin.ch'
             });
+            if (gaBrowserSniffer.ios) {
+              window.localforage.setDriver('webSQLStorage');
+            }
             isInitialized = true;
             return true;
           }
