@@ -873,6 +873,20 @@
         getTileKey: function(tileUrl) {
           return tileUrl.replace(/^\/\/wmts[0-9]/, '');
         },
+        /**
+         * Search for a layer identified by bodId in the map and
+         * return it. undefined is returned if the map does not have
+         * such a layer.
+         */
+        getMapLayerForBodId: function(map, bodId) {
+          var layer;
+          map.getLayers().forEach(function(l) {
+            if (l.bodId == bodId && !l.preview) {
+              layer = l;
+            }
+          });
+          return layer;
+        },
 
         /**
          * Search for an overlay identified by bodId in the map and
@@ -930,6 +944,9 @@
           return !layer.background &&
                  layer.timeEnabled &&
                  layer.visible;
+        },
+        background: function(layer) {
+          return layer.background;
         }
       };
     };

@@ -10,7 +10,7 @@
   ]);
 
   module.directive('gaBackgroundLayerSelector',
-      function(gaPermalink, gaLayers) {
+      function(gaPermalink, gaLayers, gaLayerFilters) {
           return {
             restrict: 'A',
             replace: true,
@@ -86,6 +86,20 @@
                   setCurrentLayer(newVal, oldVal);
                 }
               });
+
+              // If another omponent add a background layer, update the
+              // selectbox.
+              scope.layers = scope.map.getLayers().getArray();
+              scope.layerFilter = gaLayerFilters.background;
+              scope.$watchCollection('layers | filter:layerFilter',
+                function(arr) {
+                  if (arr.length == 2 ||
+                      (scope.currentLayer == 'voidLayer' && arr.length == 1)) {
+                    scope.currentLayer = arr[arr.length - 1].id;
+                    scope.map.removeLayer(arr[1]);
+                  }
+                });
+
             }
           };
         });

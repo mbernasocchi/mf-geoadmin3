@@ -15,6 +15,8 @@
   module.provider('gaOffline', function() {
     var extentKey = 'ga-offline-extent';
     var layersKey = 'ga-offline-layers';
+    var opacityKey = 'ga-offline-layers-opacity';
+    var bgKey = 'ga-offline-layers-bg';
     var maxZoom = 8; // max zoom level cached
     var minRes = 2.5; // res for zoom 8
     var extentFeature = new ol.Feature(
@@ -124,7 +126,7 @@
 
     var onTileError = function(scope, err) {
       nbTilesFailed++;
-      window.console.log('\nTile failed: ' + err.url + '\n Cause:' + err.msg);
+      //window.console.log('\nTile failed: ' + err.url + '\n Cause:' + err.msg);
       errorReport += '\nTile failed: ' + err.url + '\n Cause:' + err.msg;
       broadcastDlProgress(scope);
     };
@@ -308,6 +310,33 @@
           }
         };
 
+        this.displayData = function(map) {
+          this.zoomOnExtent(map);
+          var layersIds = gaStorage.getItem(layersKey).split(',');
+          var opacity = gaStorage.getItem(opacityKey).split(',');
+          var bg = gaStorage.getItem(bgKey).split(',');
+
+          for (var i = 0, ii = layersIds.length; i < ii; i++) {
+            var bodId = gaLayers.getLayerProperty(layersIds[i],
+                'parentLayerId') || layersIds[i];
+            var olLayer = gaMapUtils.getMapLayerForBodId(map, bodId);
+            if (!olLayer) {
+              olLayer = gaLayers.getOlLayerById(bodId);
+              if (olLayer) {
+                olLayer.background = (bg[i] === 'true');
+                map.addLayer(olLayer);
+              } else {
+                // TODO: The layer doesn't exist
+                continue;
+              }
+            }
+            if (olLayer) {
+              olLayer.visible = true;
+              olLayer.invertedOpacity = opacity[i];
+            }
+          }
+        };
+
         // Download stuff
         this.abort = function(scope) {
 
@@ -322,6 +351,8 @@
           }
           gaStorage.removeItem(extentKey);
           gaStorage.removeItem(layersKey);
+          gaStorage.removeItem(opacityKey);
+          gaStorage.removeItem(bgKey);
 
           this.hideExtent();
           initDownloadStatus();
@@ -353,11 +384,18 @@
           var projection = map.getView().getView2D().getProjection();
           var queue = [];
           var layersIds = [];
+          var layersOpacity = [];
+          var layersBg = [];
           for (var i = 0, ii = layers.length; i < ii; i++) {
             var layer = layers[i];
             layersIds.push(layer.id);
-            var isBgLayer = (gaLayers.getLayerProperty(layer.bodId,
-                'background'));
+            layersOpacity.push(layer.invertedOpacity);
+            var parentLayerId = gaLayers.getLayerProperty(layer.id,
+                'parentLayerId');
+            var isBgLayer = (parentLayerId) ?
+                gaMapUtils.getMapLayerForBodId(map, parentLayerId).background :
+                layer.background;
+            layersBg.push(isBgLayer);
             var source = layer.getSource();
             var tileGrid = source.getTileGrid();
             var tileUrlFunction = source.getTileUrlFunction();
@@ -402,6 +440,10 @@
             }
           }
           gaStorage.setItem(layersKey, layersIds.join(','));
+          gaStorage.setItem(opacityKey, layersOpacity.join(','));
+          gaStorage.setItem(bgKey, layersBg.join(','));
+
+
 
           nbTilesTotal = queue.length;
           startTime = (new Date()).getTime();

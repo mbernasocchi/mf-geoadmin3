@@ -100,18 +100,15 @@
       },
       controller: 'GaOfflineDirectiveController',
       link: function(scope, elt, attrs, controller) {
-
         scope.openSelector = function() {
           gaOffline.hideMenu();
           gaOffline.showSelector();
         };
-
         scope.zoom = function() {
           gaOffline.hideMenu();
           gaOffline.showExtent(scope.map);
-          gaOffline.zoomOnExtent(scope.map);
+          gaOffline.displayData(scope.map);
         };
-
       }
     };
   });
